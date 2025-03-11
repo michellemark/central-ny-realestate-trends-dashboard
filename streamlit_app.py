@@ -23,8 +23,8 @@ st.set_page_config(
 def get_cny_data_df():
     df = pd.DataFrame()
 
-    if not os.path.exists(DB_LOCAL_PATH):
-        download_database_from_s3()
+    # Always download latest data from s3
+    download_database_from_s3()
 
     if os.path.exists(DB_LOCAL_PATH):
         db_conn = None
