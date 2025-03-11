@@ -1,0 +1,5 @@
+[server]
+runOnSave = false
+maxUploadSize = 2000  # Size in MB (2 GB)
+maxMessageSize = 2000  # also in MB
+folderWatchBlacklist = ["data"]
