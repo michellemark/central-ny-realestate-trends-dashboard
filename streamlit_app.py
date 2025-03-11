@@ -3,6 +3,7 @@ import os
 import sqlite3
 
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 from constants import APP_ICON
@@ -113,23 +114,55 @@ if not cny_data_df.empty:
 
     ''
 
-    # Pagination Controls
-    total_rows = len(filtered_cny_data_df)
+    if not filtered_cny_data_df.empty:
 
-    # Select box for rows per page, default 10
-    rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
-    total_pages = math.ceil(total_rows / rows_per_page)
+        # Pagination Controls
+        total_rows = len(filtered_cny_data_df)
 
-    # Slider to select page number
-    selected_page = st.slider(
-        "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
-    )
+        # Select box for rows per page, default 10
+        rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
+        total_pages = math.ceil(total_rows / rows_per_page)
 
-    # Get the paginated DataFrame
-    paginated_data = paginate_dataframe(filtered_cny_data_df, selected_page - 1, rows_per_page)
+        # Slider to select page number
+        selected_page = st.slider(
+            "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
+        )
 
-    # Display paginated data
-    st.dataframe(paginated_data)
+        # Get the paginated DataFrame
+        paginated_data = paginate_dataframe(filtered_cny_data_df, selected_page - 1, rows_per_page)
 
-    # Show information about the pagination state
-    st.write(f"Showing page {selected_page} of {total_pages} ({len(paginated_data)} rows).")
+        # Display paginated data
+        st.dataframe(paginated_data)
+
+        # Show information about the pagination state
+        st.write(f"Showing page {selected_page} of {total_pages} ({len(paginated_data)} rows).")
+
+        fig = px.box(
+            filtered_cny_data_df,
+            x='full_market_value',
+            orientation='h',
+            points='outliers',  # visualize outliers
+            title='Distribution of Full Market Value'
+        )
+
+        # Add mean marker explicitly
+        mean_value = filtered_cny_data_df['full_market_value'].mean()
+        fig.add_scatter(
+            x=[mean_value],
+            y=[0],  # since this is a horizontal box plot there is only one category on y-axis
+            mode='markers',
+            marker=dict(color='red', symbol='diamond', size=10),
+            name='Mean'
+        )
+
+        # Update layout to clearly indicate quartiles, median, mean, and to enhance readability
+        fig.update_layout(
+            xaxis_title='Full Market Value ($)',
+            showlegend=True
+        )
+
+        # Finally, show box plot
+        st.plotly_chart(fig, use_container_width=True)
+
+    else:
+        st.info("No data available to plot.")
