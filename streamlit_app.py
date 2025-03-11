@@ -9,7 +9,9 @@ from sqlalchemy import create_engine
 
 from constants import APP_ICON
 from constants import APP_TITLE
+from constants import CNY_COUNTY_LIST
 from constants import DB_LOCAL_PATH
+from constants import OSWEGO_COUNTY_NAME
 from constants import SQLITE_DB_CONFIG_NAME
 from db_utilities import download_database_from_s3
 
@@ -98,7 +100,9 @@ if not cny_data_df.empty:
 
     selected_counties = st.multiselect(
         'Which CNY county would you like to view data for?',
-        counties)
+        counties,
+        default=OSWEGO_COUNTY_NAME
+    )
 
     ''
     ''

@@ -18,4 +18,15 @@ NY_PROPERTY_ASSESSMENTS_TABLE = "ny_property_assessments"
 PROPERTIES_TABLE = "properties"
 
 # ******* Real Estate values **************************************
-CNY_COUNTY_LIST = ["Cayuga", "Cortland", "Madison", "Onondaga", "Oswego"]
+CAYUGA_COUNTY_NAME = "Cayuga"
+CORTLAND_COUNTY_NAME = "Cortland"
+MADISON_COUNTY_NAME = "Madison"
+ONONDAGA_COUNTY_NAME = "Onondaga"
+OSWEGO_COUNTY_NAME = "Oswego"
+CNY_COUNTY_LIST = [
+    CAYUGA_COUNTY_NAME,
+    CORTLAND_COUNTY_NAME,
+    MADISON_COUNTY_NAME,
+    ONONDAGA_COUNTY_NAME,
+    OSWEGO_COUNTY_NAME
+]
