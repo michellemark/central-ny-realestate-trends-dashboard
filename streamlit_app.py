@@ -7,11 +7,11 @@ import streamlit as st
 
 from constants import APP_ICON
 from constants import APP_TITLE
+from constants import CNY_COUNTY_LIST
 from constants import DB_LOCAL_PATH
-from constants import OSWEGO_COUNTY_NAME
 from db_utilities import download_database_from_s3
 
-# Set title and favicon in Browser tab.
+# Set title and favicon and other default page settings in Browser tab.
 st.set_page_config(
     page_title=APP_TITLE,
     page_icon=APP_ICON,
@@ -39,7 +39,7 @@ def get_cny_data_df():
                     nypa.roll_year, nypa.property_class_description, nypa.full_market_value, nypa.assessment_land, nypa.assessment_total 
                 FROM 
                     properties p
-                JOIN 
+                INNER JOIN 
                     ny_property_assessments nypa 
                 ON 
                     p.id = nypa.property_id;
@@ -98,7 +98,7 @@ if not cny_data_df.empty:
     selected_counties = st.multiselect(
         'Which CNY county would you like to view data for?',
         counties,
-        default=OSWEGO_COUNTY_NAME
+        default=CNY_COUNTY_LIST
     )
 
     ''
