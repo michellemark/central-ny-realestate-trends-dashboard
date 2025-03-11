@@ -54,8 +54,8 @@ def download_database_from_s3():
         except Exception as ex:
             status_placeholder.write("Failed to download latest database.")
 
-            # Wait a few seconds for users to read the messages
-            time.sleep(4)
+        # Wait a few seconds for users to read the messages
+        time.sleep(4)
 
-            # Clear placeholder messages
-            status_placeholder.empty()
+        # Clear placeholder messages
+        status_placeholder.empty()
