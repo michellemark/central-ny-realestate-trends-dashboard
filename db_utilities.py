@@ -1,4 +1,5 @@
 import os
+import time
 
 import boto3
 import streamlit as st
@@ -36,20 +37,25 @@ def download_database_from_s3():
     s3_client = get_s3_client()
 
     if s3_client:
+
+        # Create a placeholder for temporary messages
+        status_placeholder = st.empty()
+
         ensure_data_directory_exists()
 
         try:
-            st.write(f"Starting download of {SQLITE_DB_NAME} (this may take a moment)...")
+            status_placeholder.write("Starting fresh download of data (this may take a moment)...")
 
             with open(DB_LOCAL_PATH, 'wb') as db_file:
                 s3_client.download_fileobj(S3_BUCKET_NAME, SQLITE_DB_NAME, db_file)
 
                 file_size = os.path.getsize(DB_LOCAL_PATH)
-                if file_size > 0:
-                    st.write(f"Download complete, size: {file_size / (1024 ** 2):.2f} MB.")
-                else:
-                    st.write("Download completed but resulted in 0 bytes file, please check S3 permissions and file availability.")
-
-                st.write(f"Successfully downloaded database from S3.")
+                status_placeholder.write(f"Download complete, size: {file_size / (1024 ** 2):.2f} MB.")
         except Exception as ex:
-            st.write(f"Failed to download database from S3: {ex}")
+            status_placeholder.write("Failed to download latest database.")
+
+            # Wait a few seconds for users to read the messages
+            time.sleep(4)
+
+            # Clear placeholder messages
+            status_placeholder.empty()
