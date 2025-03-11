@@ -35,7 +35,7 @@ def get_cny_data_df():
             # Select all columns from properties and ny_property_assessments joined on property id
             query = """
                 SELECT 
-                    p.swis_code, p.print_key_code, p.county_name, p.school_district_name, p.address_street, p.municipality_name, p.address_state, p.address_zip, 
+                    p.id, p.county_name, p.school_district_name, p.address_street, p.municipality_name, p.address_state, p.address_zip, 
                     nypa.roll_year, nypa.property_class_description, nypa.full_market_value, nypa.assessment_land, nypa.assessment_total 
                 FROM 
                     properties p
