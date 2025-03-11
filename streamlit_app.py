@@ -1,24 +1,21 @@
-import os
-
 import math
+import os
 import sqlite3
 
 import pandas as pd
 import streamlit as st
-from sqlalchemy import create_engine
 
 from constants import APP_ICON
 from constants import APP_TITLE
-from constants import CNY_COUNTY_LIST
 from constants import DB_LOCAL_PATH
 from constants import OSWEGO_COUNTY_NAME
-from constants import SQLITE_DB_CONFIG_NAME
 from db_utilities import download_database_from_s3
 
 # Set title and favicon in Browser tab.
 st.set_page_config(
     page_title=APP_TITLE,
     page_icon=APP_ICON,
+    layout="wide"
 )
 
 
