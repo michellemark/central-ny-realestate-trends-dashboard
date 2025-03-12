@@ -9,8 +9,11 @@ import streamlit as st
 
 from constants import APP_ICON
 from constants import APP_TITLE
+from constants import ASSESSMENT_RATIOS_TABLE
 from constants import CNY_COUNTY_LIST
 from constants import DB_LOCAL_PATH
+from constants import NY_PROPERTY_ASSESSMENTS_TABLE
+from constants import PROPERTIES_TABLE
 from db_utilities import download_database_from_s3
 
 # Set title and favicon and other default page settings in Browser tab.
@@ -35,17 +38,30 @@ def get_cny_data_df():
             db_conn = sqlite3.connect(DB_LOCAL_PATH)
 
             # Select all columns from properties and ny_property_assessments joined on property id
-            query = """
-                SELECT  
-                    p.id, p.county_name, p.school_district_name, p.address_street, p.municipality_name, p.address_state,
-                    p.address_zip, nypa.roll_year, nypa.property_category, nypa.property_class_description, 
-                    nypa.full_market_value, nypa.front, nypa.depth, nypa.assessment_land, nypa.assessment_total 
-                FROM 
-                    properties p
-                INNER JOIN 
-                    ny_property_assessments nypa 
-                ON 
-                    p.id = nypa.property_id;
+            query = f"""
+                SELECT
+                    p.id,
+                    p.county_name,
+                    p.school_district_name,
+                    p.address_street,
+                    p.municipality_name,
+                    p.address_state,
+                    p.address_zip,
+                    nypa.roll_year,
+                    nypa.property_category,
+                    nypa.property_class_description,
+                    nypa.full_market_value,
+                    nypa.front,
+                    nypa.depth,
+                    nypa.assessment_land,
+                    nypa.assessment_total,
+                    mar.residential_assessment_ratio
+                FROM
+                    {PROPERTIES_TABLE} p
+                INNER JOIN
+                    {NY_PROPERTY_ASSESSMENTS_TABLE} nypa ON p.id = nypa.property_id
+                LEFT JOIN
+                    {ASSESSMENT_RATIOS_TABLE} mar ON p.municipality_code = mar.municipality_code;
             """
             df = pd.read_sql_query(query, db_conn)
         except Exception as ex:

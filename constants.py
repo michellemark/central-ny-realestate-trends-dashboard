@@ -2,7 +2,7 @@ import os
 
 
 # ******* File paths and names ***********************************
-APP_TITLE = "Central New York Real Estate Trends and Analytics"
+APP_TITLE = "Central New York Real Estate Analytics"
 APP_ICON = "👩‍🎓"
 CURRENT_FILE_PATH = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.dirname(CURRENT_FILE_PATH)
