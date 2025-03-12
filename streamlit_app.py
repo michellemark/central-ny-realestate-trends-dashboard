@@ -124,7 +124,7 @@ if not cny_data_df.empty:
         if selected_school_district != "All Districts":
             filtered_cny_data_df = filtered_cny_data_df[
                 filtered_cny_data_df['school_district_name'] == selected_school_district
-            ]
+                ]
 
         # Pagination Controls
         total_rows = len(filtered_cny_data_df)
@@ -215,6 +215,18 @@ if not cny_data_df.empty:
         | 🔸 **Mean (Average)**          | {mean:,.2f}                  |
         | 🔹 **Median (Middle Value)**   | {q2_median:,.2f}             |
         | 📌 **Standard Deviation**      | {std_dev:,.2f}                |
+        """)
+
+        st.markdown("""
+        ### 📖 What does *Standard Deviation* mean here?
+
+        **Standard deviation** is a measure of how spread out property values are around the average (mean). 
+
+        - A **low value** means most properties have market values close to average—prices are relatively consistent.
+        - A **high value** means values vary widely, and there's a larger gap between cheaper and more expensive properties.
+
+        It is a value that indicates whether property values in the selected data generally tend to cluster closely 
+        around the average market price, or show significant variation from property to property.
         """)
 
     else:
