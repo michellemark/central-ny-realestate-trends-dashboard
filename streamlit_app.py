@@ -2,6 +2,7 @@ import math
 import os
 import sqlite3
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -38,7 +39,7 @@ def get_cny_data_df():
                 SELECT  
                     p.id, p.county_name, p.school_district_name, p.address_street, p.municipality_name, p.address_state,
                     p.address_zip, nypa.roll_year, nypa.property_category, nypa.property_class_description, 
-                    nypa.full_market_value, nypa.assessment_land, nypa.assessment_total 
+                    nypa.full_market_value, nypa.front, nypa.depth, nypa.assessment_land, nypa.assessment_total 
                 FROM 
                     properties p
                 INNER JOIN 
@@ -87,7 +88,6 @@ zip codes for properties are often missing. But it's otherwise a great (and did 
 
 # Add some spacing
 ''
-''
 
 cny_data_df = get_cny_data_df()
 
@@ -102,19 +102,29 @@ if not cny_data_df.empty:
         counties,
         default=CNY_COUNTY_LIST
     )
-
-    ''
-    ''
-    ''
-
-    # Filter the data
     filtered_cny_data_df = cny_data_df[(cny_data_df['county_name'].isin(selected_counties))]
 
-    st.header('CNY Real Estate Data Available', divider='gray')
-
-    ''
-
     if not filtered_cny_data_df.empty:
+        property_categories = filtered_cny_data_df['property_category'].dropna().unique()
+        selected_category = st.selectbox(
+            "Select Property Category (optional filter):",
+            ["All Categories", *property_categories]
+        )
+
+        if selected_category != "All Categories":
+            filtered_cny_data_df = filtered_cny_data_df[filtered_cny_data_df['property_category'] == selected_category]
+
+        school_districts = filtered_cny_data_df['school_district_name'].dropna().unique()
+        school_districts.sort()
+        selected_school_district = st.selectbox(
+            "Select School District (optional filter):",
+            ["All Districts", *school_districts]
+        )
+
+        if selected_school_district != "All Districts":
+            filtered_cny_data_df = filtered_cny_data_df[
+                filtered_cny_data_df['school_district_name'] == selected_school_district
+            ]
 
         # Pagination Controls
         total_rows = len(filtered_cny_data_df)
@@ -128,9 +138,32 @@ if not cny_data_df.empty:
             "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
         )
 
-        # Get the paginated DataFrame
-        paginated_data = paginate_dataframe(filtered_cny_data_df, selected_page - 1, rows_per_page)
+        # Sort data to display paginated as per user request
+        col1, col2 = st.columns([2, 1])
 
+        with col1:
+            sort_column = st.selectbox(
+                "Sort by column:",
+                options=filtered_cny_data_df.columns,
+                index=list(filtered_cny_data_df.columns).index("full_market_value")
+            )
+
+        with col2:
+            sort_direction = st.selectbox(
+                "Sort direction:",
+                ["Ascending", "Descending"]
+            )
+
+        sorted_df = filtered_cny_data_df.sort_values(
+            by=sort_column,
+            ascending=sort_direction == "Ascending"
+        ).reset_index(drop=True)
+
+        # Get the paginated DataFrame
+        paginated_data = paginate_dataframe(sorted_df, selected_page - 1, rows_per_page)
+
+        ''
+        st.header('CNY Real Estate Data Available', divider='gray')
         # Display paginated data
         st.dataframe(paginated_data)
 
@@ -163,6 +196,26 @@ if not cny_data_df.empty:
 
         # Finally, show box plot
         st.plotly_chart(fig, use_container_width=True)
+
+        # Calculate quartiles, median, mean, std deviation
+        q1 = np.percentile(filtered_cny_data_df['full_market_value'], 25)
+        q2_median = np.percentile(filtered_cny_data_df['full_market_value'], 50)
+        q3 = np.percentile(filtered_cny_data_df['full_market_value'], 75)
+        mean = filtered_cny_data_df['full_market_value'].mean()
+        std_dev = filtered_cny_data_df['full_market_value'].std()
+
+        st.subheader("📊 Statistical Summary for Full Market Value")
+        st.markdown(f"""
+        | Measure                        | Value (USD)                  |
+        | ------------------------------ | -----------------------------|
+        | 💲 **Quartile 1 (0% - 25%)**   | {filtered_cny_data_df['full_market_value'].min():,.2f} to {q1:,.2f}  |
+        | 💲 **Quartile 2 (25% - 50%)**  | {q1:,.2f} to {q2_median:,.2f}  |
+        | 💲 **Quartile 3 (50% - 75%)**  | {q2_median:,.2f} to {q3:,.2f}  |
+        | 💲 **Quartile 4 (75% - 100%)** | {q3:,.2f} to {filtered_cny_data_df['full_market_value'].max():,.2f}  |
+        | 🔸 **Mean (Average)**          | {mean:,.2f}                  |
+        | 🔹 **Median (Middle Value)**   | {q2_median:,.2f}             |
+        | 📌 **Standard Deviation**      | {std_dev:,.2f}                |
+        """)
 
     else:
         st.info("No data available to plot.")
