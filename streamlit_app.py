@@ -94,38 +94,39 @@ if not cny_data_df.empty:
         rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
         total_pages = math.ceil(total_rows / rows_per_page)
 
+        # Keep selected page in session so all controls stay in sync
+        if 'selected_page' not in st.session_state:
+            st.session_state.selected_page = 1
+
         # Slider to select page number
         selected_page = st.slider(
-            "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
+            "Page", min_value=1, max_value=total_pages, value=st.session_state.selected_page, format="Page %d"
         )
 
         # Get the paginated DataFrame
-        paginated_data = paginate_dataframe(sorted_df, selected_page - 1, rows_per_page)
+        paginated_data = paginate_dataframe(sorted_df, st.session_state.selected_page - 1, rows_per_page)
 
         st.header('CNY Real Estate Data Available', divider='gray')
         # Display paginated data
         st.dataframe(paginated_data)
 
-        # Show information about the pagination state
-        st.write(f"Showing page {selected_page} of {total_pages} ({len(paginated_data)} rows).")
-
         # Previous and next page controls for easier navigation when there are a high number of pages
-        if 'selected_page' not in st.session_state:
-            st.session_state.selected_page = 1
+        col_prev, col_info, col_next = st.columns([1, 2, 1])
 
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col1:
+        with col_prev:
             if st.button("← Previous"):
                 if st.session_state.selected_page > 1:
                     st.session_state.selected_page -= 1
 
-        with col3:
+        with col_info:
+            st.markdown(
+                f"<div style='text-align:center'>Page **{st.session_state.selected_page}** of **{total_pages}**</div>",
+                unsafe_allow_html=True)
+
+        with col_next:
             if st.button("Next →"):
                 if st.session_state.selected_page < total_pages:
                     st.session_state.selected_page += 1
-
-        with col2:
-            st.write(f"Page {st.session_state.selected_page} of {total_pages}")
 
         fig = px.box(
             filtered_cny_data_df,
