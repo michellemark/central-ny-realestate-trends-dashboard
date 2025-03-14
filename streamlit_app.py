@@ -122,7 +122,7 @@ if not cny_data_df.empty:
 
         # Slider to select page number
         st.session_state.selected_page = st.slider(
-            label="",
+            label="Page Slider",
             min_value=1,
             max_value=total_pages,
             value=st.session_state.selected_page,
