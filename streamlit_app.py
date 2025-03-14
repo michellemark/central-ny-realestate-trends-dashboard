@@ -1,20 +1,14 @@
 import math
-import os
-import sqlite3
 
 import numpy as np
-import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from constants import APP_ICON
 from constants import APP_TITLE
-from constants import ASSESSMENT_RATIOS_TABLE
 from constants import CNY_COUNTY_LIST
-from constants import DB_LOCAL_PATH
-from constants import NY_PROPERTY_ASSESSMENTS_TABLE
-from constants import PROPERTIES_TABLE
-from db_utilities import download_database_from_s3
+from db_utilities import get_cny_data_df
+from db_utilities import paginate_dataframe
 
 # Set title and favicon and other default page settings in Browser tab.
 st.set_page_config(
@@ -24,76 +18,7 @@ st.set_page_config(
 )
 
 
-# -----------------------------------------------------------------------------
-def get_cny_data_df():
-    df = pd.DataFrame()
-
-    # Always download latest data from s3
-    download_database_from_s3()
-
-    if os.path.exists(DB_LOCAL_PATH):
-        db_conn = None
-
-        try:
-            db_conn = sqlite3.connect(DB_LOCAL_PATH)
-
-            # Select all columns from properties and ny_property_assessments joined on property id
-            query = f"""
-                SELECT
-                    p.id,
-                    p.county_name,
-                    p.school_district_name,
-                    p.address_street,
-                    p.municipality_name,
-                    p.address_state,
-                    p.address_zip,
-                    nypa.roll_year,
-                    nypa.property_category,
-                    nypa.property_class_description,
-                    nypa.full_market_value,
-                    nypa.front,
-                    nypa.depth,
-                    nypa.assessment_land,
-                    nypa.assessment_total,
-                    mar.residential_assessment_ratio
-                FROM
-                    {PROPERTIES_TABLE} p
-                INNER JOIN
-                    {NY_PROPERTY_ASSESSMENTS_TABLE} nypa ON p.id = nypa.property_id
-                LEFT JOIN
-                    {ASSESSMENT_RATIOS_TABLE} mar ON p.municipality_code = mar.municipality_code;
-            """
-            df = pd.read_sql_query(query, db_conn)
-        except Exception as ex:
-            st.write(f"Error reading database: {ex}")
-        finally:
-            db_conn.close()
-
-    return df
-
-
-def paginate_dataframe(df, page: int, rows_per_page: int):
-    """
-    Paginate the DataFrame.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to paginate.
-        page (int): The current page (zero-indexed).
-        rows_per_page (int): Number of rows per page.
-
-    Returns:
-        pd.DataFrame: A subset of the DataFrame for the given page.
-    """
-    start_row = page * rows_per_page
-    end_row = start_row + rows_per_page
-
-    return df.iloc[start_row:end_row]
-
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
+# Top of page.
 f""" 
 # {APP_ICON} {APP_TITLE}
 
@@ -102,7 +27,6 @@ other free data sources. As you will notice, the data only includes 2024 right n
 zip codes for properties are often missing. But it's otherwise a great (and did I mention _free_?) source of data.
 """
 
-# Add some spacing
 ''
 
 cny_data_df = get_cny_data_df()
@@ -142,19 +66,7 @@ if not cny_data_df.empty:
                 filtered_cny_data_df['school_district_name'] == selected_school_district
                 ]
 
-        # Pagination Controls
-        total_rows = len(filtered_cny_data_df)
-
-        # Select box for rows per page, default 10
-        rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
-        total_pages = math.ceil(total_rows / rows_per_page)
-
-        # Slider to select page number
-        selected_page = st.slider(
-            "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
-        )
-
-        # Sort data to display paginated as per user request
+        # Sort data options
         col1, col2 = st.columns([2, 1])
 
         with col1:
@@ -174,6 +86,18 @@ if not cny_data_df.empty:
             by=sort_column,
             ascending=sort_direction == "Ascending"
         ).reset_index(drop=True)
+
+        # Pagination Controls
+        total_rows = len(filtered_cny_data_df)
+
+        # Select box for rows per page, default 10
+        rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
+        total_pages = math.ceil(total_rows / rows_per_page)
+
+        # Slider to select page number
+        selected_page = st.slider(
+            "Page", min_value=1, max_value=total_pages, value=1, format="Page %d"
+        )
 
         # Get the paginated DataFrame
         paginated_data = paginate_dataframe(sorted_df, selected_page - 1, rows_per_page)
