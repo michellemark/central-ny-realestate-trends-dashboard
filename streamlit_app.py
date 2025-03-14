@@ -99,8 +99,12 @@ if not cny_data_df.empty:
             st.session_state.selected_page = 1
 
         # Slider to select page number
-        selected_page = st.slider(
-            "Page", min_value=1, max_value=total_pages, value=st.session_state.selected_page, format="Page %d"
+        st.session_state.selected_page = st.slider(
+            "Page",
+            min_value=1,
+            max_value=max(total_pages, 1),
+            value=st.session_state.selected_page,
+            format="Page %d"
         )
 
         # Get the paginated DataFrame
