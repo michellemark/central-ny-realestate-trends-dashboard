@@ -115,20 +115,21 @@ if not cny_data_df.empty:
 
 
         def slider_changed():
-            st.session_state.selected_page = st.session_state.slider_page
-            st.rerun()
+            if st.session_state.slider_page != st.session_state.selected_page:
+                st.session_state.selected_page = st.session_state.slider_page
+                st.rerun()
 
 
         # Slider to select page number
         st.session_state.selected_page = st.slider(
-            "Page",
+            label="",
             min_value=1,
-            max_value=max(total_pages, 1),
+            max_value=total_pages,
             value=st.session_state.selected_page,
             format="Page %d",
             key="slider_page",
+            label_visibility='collapsed',
             on_change=slider_changed
-
         )
 
         # Paginated DataFrame
