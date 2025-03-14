@@ -120,7 +120,7 @@ if not cny_data_df.empty:
 
         with col_info:
             st.markdown(
-                f"<div style='text-align:center'>Page **{st.session_state.selected_page}** of **{total_pages}**</div>",
+                f"<div style='text-align:center'>Page <b>{st.session_state.selected_page}</b> of <b>{total_pages}</b></div>",
                 unsafe_allow_html=True)
 
         with col_next:
