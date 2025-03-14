@@ -104,10 +104,11 @@ if not cny_data_df.empty:
             min_value=1,
             max_value=max(total_pages, 1),
             value=st.session_state.selected_page,
-            format="Page %d"
+            format="Page %d",
+            label_visibility="collapsed"
         )
 
-        # Get the paginated DataFrame
+        # Paginated DataFrame
         paginated_data = paginate_dataframe(sorted_df, st.session_state.selected_page - 1, rows_per_page)
 
         st.header('CNY Real Estate Data Available', divider='gray')
