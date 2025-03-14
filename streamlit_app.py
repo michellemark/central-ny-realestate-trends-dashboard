@@ -124,9 +124,14 @@ if not cny_data_df.empty:
                 unsafe_allow_html=True)
 
         with col_next:
-            if st.button("Next →"):
-                if st.session_state.selected_page < total_pages:
-                    st.session_state.selected_page += 1
+
+            # Use nested columns to align button right
+            spacer, next_button_col = st.columns([5, 1])
+
+            with next_button_col:
+                if st.button("Next →"):
+                    if st.session_state.selected_page < total_pages:
+                        st.session_state.selected_page += 1
 
         fig = px.box(
             filtered_cny_data_df,
