@@ -109,6 +109,24 @@ if not cny_data_df.empty:
         # Show information about the pagination state
         st.write(f"Showing page {selected_page} of {total_pages} ({len(paginated_data)} rows).")
 
+        # Previous and next page controls for easier navigation when there are a high number of pages
+        if 'selected_page' not in st.session_state:
+            st.session_state.selected_page = 1
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col1:
+            if st.button("← Previous"):
+                if st.session_state.selected_page > 1:
+                    st.session_state.selected_page -= 1
+
+        with col3:
+            if st.button("Next →"):
+                if st.session_state.selected_page < total_pages:
+                    st.session_state.selected_page += 1
+
+        with col2:
+            st.write(f"Page {st.session_state.selected_page} of {total_pages}")
+
         fig = px.box(
             filtered_cny_data_df,
             x='full_market_value',
