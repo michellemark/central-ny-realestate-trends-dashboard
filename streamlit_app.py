@@ -126,7 +126,7 @@ if not cny_data_df.empty:
         with col_next:
 
             # Use nested columns to align button right
-            spacer, next_button_col = st.columns([5, 1])
+            spacer, next_button_col = st.columns([4, 2])
 
             with next_button_col:
                 if st.button("Next →"):
