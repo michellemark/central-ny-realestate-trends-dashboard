@@ -98,6 +98,9 @@ if not cny_data_df.empty:
         if 'selected_page' not in st.session_state:
             st.session_state.selected_page = 1
 
+        # Ensure selected_page remains within valid bounds after filtering
+        st.session_state.selected_page = min(max(st.session_state.selected_page, 1), total_pages)
+
         # Slider to select page number
         st.session_state.selected_page = st.slider(
             "Page",
