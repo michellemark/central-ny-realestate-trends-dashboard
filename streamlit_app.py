@@ -84,7 +84,7 @@ if not cny_data_df.empty:
 
         sorted_df = filtered_cny_data_df.sort_values(
             by=sort_column,
-            ascending=sort_direction == "Descending"
+            ascending=sort_direction == "Ascending"
         ).reset_index(drop=True)
 
         # Pagination Controls
@@ -94,9 +94,30 @@ if not cny_data_df.empty:
         rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
         total_pages = math.ceil(total_rows / rows_per_page)
 
-        # Keep selected page in session so all controls stay in sync
+        # Session State Initialization
         if 'selected_page' not in st.session_state:
             st.session_state.selected_page = 1
+
+        # Check page doesn't overflow on rows_per_page change
+        st.session_state.selected_page = min(max(st.session_state.selected_page, 1), total_pages)
+
+
+        def previous_page():
+            if st.session_state.selected_page > 1:
+                st.session_state.selected_page -= 1
+                st.rerun()
+
+
+        def next_page():
+            if st.session_state.selected_page < total_pages:
+                st.session_state.selected_page += 1
+                st.rerun()
+
+
+        def slider_changed():
+            st.session_state.selected_page = st.session_state.slider_page
+            st.rerun()
+
 
         # Slider to select page number
         st.session_state.selected_page = st.slider(
@@ -105,7 +126,9 @@ if not cny_data_df.empty:
             max_value=max(total_pages, 1),
             value=st.session_state.selected_page,
             format="Page %d",
-            label_visibility="collapsed"
+            key="slider_page",
+            on_change=slider_changed
+
         )
 
         # Paginated DataFrame
@@ -119,9 +142,7 @@ if not cny_data_df.empty:
         col_prev, col_info, col_next = st.columns([1, 2, 1])
 
         with col_prev:
-            if st.button("← Previous"):
-                if st.session_state.selected_page > 1:
-                    st.session_state.selected_page -= 1
+            st.button("← Previous", on_click=previous_page)
 
         with col_info:
             st.markdown(
@@ -134,9 +155,7 @@ if not cny_data_df.empty:
             spacer, next_button_col = st.columns([4, 2])
 
             with next_button_col:
-                if st.button("Next →"):
-                    if st.session_state.selected_page < total_pages:
-                        st.session_state.selected_page += 1
+                st.button("Next →", on_click=next_page)
 
         fig = px.box(
             filtered_cny_data_df,
