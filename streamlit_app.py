@@ -84,7 +84,7 @@ if not cny_data_df.empty:
 
         sorted_df = filtered_cny_data_df.sort_values(
             by=sort_column,
-            ascending=sort_direction == "Ascending"
+            ascending=sort_direction == "Descending"
         ).reset_index(drop=True)
 
         # Pagination Controls
