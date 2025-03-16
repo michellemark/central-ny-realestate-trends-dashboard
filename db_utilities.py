@@ -37,6 +37,7 @@ def get_s3_client():
     return s3_client
 
 
+@st.cache_resource(ttl=3600)
 def download_database_from_s3():
     """Download SQLite database from S3 bucket to local path."""
     s3_client = get_s3_client()
