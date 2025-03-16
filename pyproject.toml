@@ -1,0 +1,23 @@
+[project]
+name = "central-ny-realestate-trends-dashboard"
+version = "0.1.0"
+description = "CNY realestate anaylytics streamlit app. Part of capstone project for BS in computer science."
+authors = [
+    {name = "Michelle Mark"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "boto3 (>=1.37.13,<2.0.0)",
+    "numpy (>=2.2.3,<3.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "plotly (>=6.0.0,<7.0.0)",
+    "streamlit (>=1.43.2,<2.0.0)"
+]
+
+[tool.poetry]
+package-mode = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

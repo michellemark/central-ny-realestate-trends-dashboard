@@ -98,9 +98,6 @@ if not cny_data_df.empty:
         if 'selected_page' not in st.session_state:
             st.session_state.selected_page = 1
 
-        # Check page doesn't overflow on rows_per_page change
-        st.session_state.selected_page = min(max(st.session_state.selected_page, 1), total_pages)
-
 
         def previous_page():
             if st.session_state.selected_page > 1:
@@ -122,13 +119,12 @@ if not cny_data_df.empty:
 
         # Slider to select page number
         st.session_state.selected_page = st.slider(
-            label="Page Slider",
+            label="Data Page Slider",
             min_value=1,
             max_value=total_pages,
             value=st.session_state.selected_page,
-            format="Page %d",
+            format="%c",
             key="slider_page",
-            label_visibility='collapsed',
             on_change=slider_changed
         )
 
