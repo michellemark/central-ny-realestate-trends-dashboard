@@ -10,8 +10,8 @@
 ### Visualize Data For Central New York Real Estate Analytics App
 
 This repository contains a user-friendly Streamlit web application designed 
-to visualize and provide analytics on property assessment data for CNY counties.  
-Data is sourced from an SQLite database hosted on Amazon S3, and acquired with 
+to visualize and provide analytics on property assessment data for CNY counties.  Data 
+is sourced from an SQLite database hosted on Amazon S3, and acquired with 
 the [etl-pipeline](https://github.com/michellemark/etl-pipeline.git) 
 part of this capstone project.
 
