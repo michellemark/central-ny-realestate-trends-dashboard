@@ -15,6 +15,8 @@ is sourced from an SQLite database hosted on Amazon S3, and acquired with
 the [etl-pipeline](https://github.com/michellemark/etl-pipeline.git) 
 part of this capstone project.
 
+The dashboard can be [viewed in Streamlit Cloud here](https://central-ny-realestate-trends-dashboard-zv1p75c7cpn.streamlit.app/).
+
 #### Project Objectives
 
 - Provide an intuitive interface for analyzing property records, including market values, assessment ratios, and geographical
