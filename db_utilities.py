@@ -67,6 +67,7 @@ def download_database_from_s3():
         status_placeholder.empty()
 
 
+@st.cache_resource(ttl=3600)
 def get_cny_data_df():
     df = pd.DataFrame()
 
@@ -106,6 +107,30 @@ def get_cny_data_df():
                     {ASSESSMENT_RATIOS_TABLE} mar ON p.municipality_code = mar.municipality_code;
             """
             df = pd.read_sql_query(query, db_conn)
+
+            # Optimize Data Types to Reduce Memory Usage
+            # Convert numeric columns to smaller, efficient types
+            df["id"] = df["id"].astype("int32")
+            df["roll_year"] = df["roll_year"].astype("int16")
+            df["full_market_value"] = df["full_market_value"].astype("float32")
+            df["front"] = df["front"].astype("float32")
+            df["depth"] = df["depth"].astype("float32")
+            df["assessment_land"] = df["assessment_land"].astype("float32")
+            df["assessment_total"] = df["assessment_total"].astype("float32")
+            df["residential_assessment_ratio"] = df["residential_assessment_ratio"].astype("float32")
+
+            # Convert categorical/text columns to "category" to save memory
+            category_cols = [
+                "county_name",
+                "school_district_name",
+                "municipality_name",
+                "address_state",
+                "property_category",
+                "property_class_description"
+            ]
+
+            for col in category_cols:
+                df[col] = df[col].astype("category")
         except Exception as ex:
             st.write(f"Error reading database: {ex}")
         finally:
