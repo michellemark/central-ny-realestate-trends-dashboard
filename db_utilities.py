@@ -110,7 +110,6 @@ def get_cny_data_df():
 
             # Optimize Data Types to Reduce Memory Usage
             # Convert numeric columns to smaller, efficient types
-            df["id"] = df["id"].astype("int32")
             df["roll_year"] = df["roll_year"].astype("int16")
             df["full_market_value"] = df["full_market_value"].astype("float32")
             df["front"] = df["front"].astype("float32")
