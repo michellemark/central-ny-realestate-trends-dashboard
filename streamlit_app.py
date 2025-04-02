@@ -54,8 +54,7 @@ if not cny_data_df.empty:
         if selected_category != "All Categories":
             filtered_cny_data_df = filtered_cny_data_df[filtered_cny_data_df['property_category'] == selected_category]
 
-        school_districts = filtered_cny_data_df['school_district_name'].dropna().unique()
-        school_districts.sort()
+        school_districts = sorted(filtered_cny_data_df['school_district_name'].dropna().unique())
         selected_school_district = st.selectbox(
             "Select School District (optional filter):",
             ["All Districts", *school_districts]
