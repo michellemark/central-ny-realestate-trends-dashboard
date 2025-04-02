@@ -123,7 +123,6 @@ if not cny_data_df.empty:
             min_value=1,
             max_value=total_pages,
             value=st.session_state.selected_page,
-            format="%c",
             key="slider_page",
             on_change=slider_changed
         )
