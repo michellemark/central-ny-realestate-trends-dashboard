@@ -11,6 +11,10 @@ SQLITE_DB_NAME = "cny-real-estate.db"
 DB_LOCAL_PATH = os.path.join(DATA_DIR, SQLITE_DB_NAME)
 SQLITE_DB_CONFIG_NAME = "cny_real_estate"
 S3_BUCKET_NAME = "cny-realestate-data"
+VERSION_FILE_NAME = "cny-real-estate-version.txt"
+LOCAL_VERSION_PATH = os.path.join(DATA_DIR, "cny-real-estate-version.txt")
+GZIPPED_DB_NAME = f"{SQLITE_DB_NAME}.gz"
+GZIPPED_DB_LOCAL_PATH = os.path.join(DATA_DIR, GZIPPED_DB_NAME)
 
 # ******* Table names *********************************************
 ASSESSMENT_RATIOS_TABLE = "municipality_assessment_ratios"
