@@ -1,4 +1,5 @@
 import math
+from time import time
 
 import numpy as np
 import plotly.express as px
@@ -76,15 +77,80 @@ if not cny_data_df.empty:
             )
 
         with col2:
-            sort_direction = st.selectbox(
-                "Sort direction:",
-                ["Ascending", "Descending"]
+            sort_direction = st.radio(
+                "Sort direction",
+                ["Ascending", "Descending"],
+                horizontal=True
             )
 
         sorted_df = filtered_cny_data_df.sort_values(
             by=sort_column,
             ascending=sort_direction == "Ascending"
         ).reset_index(drop=True)
+        filtered_cny_data_df = sorted_df
+
+        # Search inputs
+        st.subheader("Search within filtered results")
+        col_search1, col_search2, col_search3, col_search4 = st.columns([2, 2, 1, 1])
+
+        # Initialize session state variables if they do not exist
+        if 'pre_search_df' not in st.session_state:
+            st.session_state.pre_search_df = None
+            st.session_state.is_search_applied = False
+            st.session_state.last_search_term = ""
+            st.session_state.last_search_column = ""
+
+        if 'search_term_key' not in st.session_state:
+            st.session_state.search_term_key = "search_term1"
+
+        def clear_search():
+            # Reset search for input by changing its key
+            st.session_state.search_term_key = f"search_term{hash(time())}"
+            st.session_state.is_search_applied = False
+            st.session_state.last_search_term = ""
+            st.session_state.last_search_column = ""
+
+            # Force update UI to clear the search term box. WHY is this so hard Streamlit?!!
+            st.rerun()
+
+        with col_search1:
+            available_columns = filtered_cny_data_df.columns.tolist()
+            search_column = st.selectbox("Data column to search", available_columns)
+
+        with col_search2:
+            search_term = st.text_input("Search for", key=st.session_state.search_term_key, placeholder="Search term...")
+
+        with col_search3:
+            search_button = st.button("Search", key="search_button")
+
+        with col_search4:
+            clear_button = st.button("Clear Search", key="clear_search", on_click=clear_search)
+
+        # Keep filtered data before search in a session var
+        if not st.session_state.is_search_applied:
+            st.session_state.pre_search_df = filtered_cny_data_df.copy()
+
+        # Handle search button click
+        if search_button and search_term:
+            search_results = st.session_state.pre_search_df[
+                st.session_state.pre_search_df[search_column].astype(str).str.contains(search_term, case=False, na=False)
+            ]
+            filtered_cny_data_df = search_results
+            st.session_state.is_search_applied = True
+            st.session_state.last_search_term = search_term
+            st.session_state.last_search_column = search_column
+            st.write(f"Found {len(filtered_cny_data_df)} records containing '{search_term}' in '{search_column}'")
+
+        # If a search is applied, but action after search button click, show a reminder
+        if st.session_state.is_search_applied and not search_button:
+            st.write(
+                f"Currently showing search results for '{st.session_state.last_search_term}' in '{st.session_state.last_search_column}' ({len(filtered_cny_data_df)} records)")
+
+        if st.session_state.is_search_applied and not search_button and not clear_button:
+            filtered_cny_data_df = st.session_state.pre_search_df[
+                st.session_state.pre_search_df[st.session_state.last_search_column].astype(str).str.contains(
+                    st.session_state.last_search_term, case=False, na=False)
+            ]
 
         # Pagination Controls
         total_rows = len(filtered_cny_data_df)
@@ -96,7 +162,8 @@ if not cny_data_df.empty:
         # Session State Initialization
         if 'selected_page' not in st.session_state:
             st.session_state.selected_page = 1
-
+        elif st.session_state.selected_page > total_pages:
+            st.session_state.selected_page = total_pages
 
         def previous_page():
             if st.session_state.selected_page > 1:
@@ -127,10 +194,9 @@ if not cny_data_df.empty:
         )
 
         # Paginated DataFrame
-        paginated_data = paginate_dataframe(sorted_df, st.session_state.selected_page - 1, rows_per_page)
+        paginated_data = paginate_dataframe(filtered_cny_data_df, st.session_state.selected_page - 1, rows_per_page)
 
         st.header('CNY Real Estate Data Available', divider='gray')
-        # Display paginated data
         st.dataframe(paginated_data)
 
         # Previous and next page controls for easier navigation when there are a high number of pages
