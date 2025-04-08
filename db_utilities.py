@@ -206,7 +206,3 @@ def paginate_dataframe(df, page: int, rows_per_page: int):
     end_row = start_row + rows_per_page
 
     return df.iloc[start_row:end_row]
-
-
-if __name__ == "__main__":
-    get_cny_data_df()
