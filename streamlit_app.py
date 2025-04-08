@@ -115,15 +115,20 @@ if not cny_data_df.empty:
 
         with col_search1:
             available_columns = filtered_cny_data_df.columns.tolist()
-            search_column = st.selectbox("Data column to search", available_columns)
+            search_column = st.selectbox("Data column to search",
+                                         available_columns)
 
         with col_search2:
-            search_term = st.text_input("Search for", key=st.session_state.search_term_key, placeholder="Search term...")
+            search_term = st.text_input("Search for",
+                                        key=st.session_state.search_term_key,
+                                        placeholder="Search term...")
 
         with col_search3:
+            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             search_button = st.button("Search", key="search_button")
 
         with col_search4:
+            st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
             clear_button = st.button("Clear Search", key="clear_search", on_click=clear_search)
 
         # Keep filtered data before search in a session var
