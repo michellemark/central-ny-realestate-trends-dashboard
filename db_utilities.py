@@ -12,13 +12,11 @@ import streamlit as st
 from constants import ASSESSMENT_RATIOS_TABLE
 from constants import DATA_DIR
 from constants import DB_LOCAL_PATH
-from constants import GZIPPED_DB_LOCAL_PATH
 from constants import GZIPPED_DB_NAME
 from constants import LOCAL_VERSION_PATH
 from constants import NY_PROPERTY_ASSESSMENTS_TABLE
 from constants import PROPERTIES_TABLE
 from constants import S3_BUCKET_NAME
-from constants import SQLITE_DB_NAME
 from constants import VERSION_FILE_NAME
 
 

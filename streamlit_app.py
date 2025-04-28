@@ -110,9 +110,6 @@ if not cny_data_df.empty:
             st.session_state.last_search_term = ""
             st.session_state.last_search_column = ""
 
-            # Force update UI to clear the search term box. WHY is this so hard Streamlit?!!
-            st.rerun()
-
         with col_search1:
             available_columns = filtered_cny_data_df.columns.tolist()
             search_column = st.selectbox("Data column to search",
@@ -173,20 +170,14 @@ if not cny_data_df.empty:
         def previous_page():
             if st.session_state.selected_page > 1:
                 st.session_state.selected_page -= 1
-                st.rerun()
-
 
         def next_page():
             if st.session_state.selected_page < total_pages:
                 st.session_state.selected_page += 1
-                st.rerun()
-
 
         def slider_changed():
             if st.session_state.slider_page != st.session_state.selected_page:
                 st.session_state.selected_page = st.session_state.slider_page
-                st.rerun()
-
 
         # Slider to select page number
         st.session_state.selected_page = st.slider(
