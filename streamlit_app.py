@@ -23,8 +23,8 @@ st.set_page_config(
 f""" 
 # {APP_ICON} {APP_TITLE}
 
-Browse Central New York (CNY) Real Estate data and related statistics derived from property assessments for 2024
-published by New York municipalities and made freely available via [Open NY](https://data.ny.gov/developers) APIs. 
+Browse Central New York (CNY) Real Estate data and related statistics derived from property assessments for 2024,
+as published by New York municipalities, and made freely available via [Open NY](https://data.ny.gov/developers) APIs. 
 Some zip codes for properties are missing, as NY only publishes zipcodes for the owner's mailing address, 
 which is not always the same as the parcel address.
 """
