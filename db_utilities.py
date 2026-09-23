@@ -36,7 +36,7 @@ def get_s3_client():
             region_name=st.secrets["aws"]["aws_region"]
         )
         s3_client = aws_session.client("s3")
-    except KeyError:
+    except Exception as ex:
         st.write("Unable to create S3 client, check AWS credentials in secrets.toml.")
 
     return s3_client

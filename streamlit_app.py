@@ -165,30 +165,47 @@ if not cny_data_df.empty:
         # Session State Initialization
         if 'selected_page' not in st.session_state:
             st.session_state.selected_page = 1
-        elif st.session_state.selected_page > total_pages:
+
+        if st.session_state.selected_page > total_pages:
             st.session_state.selected_page = total_pages
+        elif st.session_state.selected_page < 1:
+            st.session_state.selected_page = 1
+
+        if 'slider_page' in st.session_state:
+            if st.session_state.slider_page > total_pages:
+                st.session_state.slider_page = total_pages
+            elif st.session_state.slider_page < 1:
+                st.session_state.slider_page = 1
+            if st.session_state.slider_page != st.session_state.selected_page:
+                st.session_state.slider_page = st.session_state.selected_page
 
         def previous_page():
             if st.session_state.selected_page > 1:
                 st.session_state.selected_page -= 1
+                st.session_state.slider_page = st.session_state.selected_page
 
         def next_page():
             if st.session_state.selected_page < total_pages:
                 st.session_state.selected_page += 1
+                st.session_state.slider_page = st.session_state.selected_page
 
         def slider_changed():
-            if st.session_state.slider_page != st.session_state.selected_page:
+            if 'slider_page' in st.session_state:
                 st.session_state.selected_page = st.session_state.slider_page
 
-        # Slider to select page number
-        st.session_state.selected_page = st.slider(
-            label="Data Page Slider",
-            min_value=1,
-            max_value=total_pages,
-            value=st.session_state.selected_page,
-            key="slider_page",
-            on_change=slider_changed
-        )
+        # Slider to select page number (only display when more than one page exists)
+        if total_pages > 1:
+            st.session_state.selected_page = st.slider(
+                label="Data Page Slider",
+                min_value=1,
+                max_value=total_pages,
+                value=st.session_state.selected_page,
+                key="slider_page",
+                on_change=slider_changed
+            )
+        else:
+            st.session_state.selected_page = 1
+            st.session_state.slider_page = 1
 
         # Paginated DataFrame
         paginated_data = paginate_dataframe(filtered_cny_data_df, st.session_state.selected_page - 1, rows_per_page)
