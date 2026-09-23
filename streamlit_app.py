@@ -158,138 +158,143 @@ if not cny_data_df.empty:
         # Pagination Controls
         total_rows = len(filtered_cny_data_df)
 
-        # Select box for rows per page, default 10
-        rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
-        total_pages = math.ceil(total_rows / rows_per_page)
+        if total_rows > 0:
+            # Select box for rows per page, default 10
+            rows_per_page = st.selectbox("Rows per page:", options=[10, 25, 50, 100], index=0)
+            total_pages = math.ceil(total_rows / rows_per_page)
 
-        # Session State Initialization
-        if 'selected_page' not in st.session_state:
-            st.session_state.selected_page = 1
+            # Session State Initialization
+            if 'selected_page' not in st.session_state:
+                st.session_state.selected_page = 1
 
-        if st.session_state.selected_page > total_pages:
-            st.session_state.selected_page = total_pages
-        elif st.session_state.selected_page < 1:
-            st.session_state.selected_page = 1
+            # Ensure selected_page is within [1, total_pages]
+            if st.session_state.selected_page > total_pages:
+                st.session_state.selected_page = total_pages
+            elif st.session_state.selected_page < 1:
+                st.session_state.selected_page = 1
 
-        if 'slider_page' in st.session_state:
-            if st.session_state.slider_page > total_pages:
-                st.session_state.slider_page = total_pages
-            elif st.session_state.slider_page < 1:
-                st.session_state.slider_page = 1
-            if st.session_state.slider_page != st.session_state.selected_page:
-                st.session_state.slider_page = st.session_state.selected_page
-
-        def previous_page():
-            if st.session_state.selected_page > 1:
-                st.session_state.selected_page -= 1
-                st.session_state.slider_page = st.session_state.selected_page
-
-        def next_page():
-            if st.session_state.selected_page < total_pages:
-                st.session_state.selected_page += 1
-                st.session_state.slider_page = st.session_state.selected_page
-
-        def slider_changed():
+            # Ensure slider_page session state key is within [1, total_pages]
             if 'slider_page' in st.session_state:
-                st.session_state.selected_page = st.session_state.slider_page
+                if st.session_state.slider_page > total_pages:
+                    st.session_state.slider_page = total_pages
+                elif st.session_state.slider_page < 1:
+                    st.session_state.slider_page = 1
+                if st.session_state.slider_page != st.session_state.selected_page:
+                    st.session_state.slider_page = st.session_state.selected_page
 
-        # Slider to select page number (only display when more than one page exists)
-        if total_pages > 1:
-            st.session_state.selected_page = st.slider(
-                label="Data Page Slider",
-                min_value=1,
-                max_value=total_pages,
-                value=st.session_state.selected_page,
-                key="slider_page",
-                on_change=slider_changed
+            def previous_page():
+                if st.session_state.selected_page > 1:
+                    st.session_state.selected_page -= 1
+                    st.session_state.slider_page = st.session_state.selected_page
+
+            def next_page():
+                if st.session_state.selected_page < total_pages:
+                    st.session_state.selected_page += 1
+                    st.session_state.slider_page = st.session_state.selected_page
+
+            def slider_changed():
+                if 'slider_page' in st.session_state:
+                    st.session_state.selected_page = st.session_state.slider_page
+
+            # Slider to select page number (only display when more than one page exists)
+            if total_pages > 1:
+                st.session_state.selected_page = st.slider(
+                    label="Data Page Slider",
+                    min_value=1,
+                    max_value=total_pages,
+                    value=st.session_state.selected_page,
+                    key="slider_page",
+                    on_change=slider_changed
+                )
+            else:
+                st.session_state.selected_page = 1
+                st.session_state.slider_page = 1
+
+            # Paginated DataFrame
+            paginated_data = paginate_dataframe(filtered_cny_data_df, st.session_state.selected_page - 1, rows_per_page)
+
+            st.header('CNY Real Estate Data Available', divider='gray')
+            st.dataframe(paginated_data)
+
+            # Previous and next page controls for easier navigation when there are a high number of pages
+            col_prev, col_info, col_next = st.columns([1, 2, 1])
+
+            with col_prev:
+                st.button("← Previous", on_click=previous_page)
+
+            with col_info:
+                st.markdown(
+                    f"<div style='text-align:center'>Page <b>{st.session_state.selected_page}</b> of <b>{total_pages}</b></div>",
+                    unsafe_allow_html=True)
+
+            with col_next:
+
+                # Use nested columns to align button right
+                spacer, next_button_col = st.columns([4, 2])
+
+                with next_button_col:
+                    st.button("Next →", on_click=next_page)
+
+            fig = px.box(
+                filtered_cny_data_df,
+                x='full_market_value',
+                orientation='h',
+                points='outliers',  # visualize outliers
+                title='Distribution of Full Market Value'
             )
+
+            # Add mean marker explicitly
+            mean_value = filtered_cny_data_df['full_market_value'].mean()
+            fig.add_scatter(
+                x=[mean_value],
+                y=[0],  # since this is a horizontal box plot there is only one category on y-axis
+                mode='markers',
+                marker=dict(color='red', symbol='diamond', size=10),
+                name='Mean'
+            )
+
+            # Update layout to clearly indicate quartiles, median, mean, and to enhance readability
+            fig.update_layout(
+                xaxis_title='Full Market Value ($)',
+                showlegend=True
+            )
+
+            # Finally, show box plot
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Calculate quartiles, median, mean, std deviation
+            q1 = np.percentile(filtered_cny_data_df['full_market_value'], 25)
+            q2_median = np.percentile(filtered_cny_data_df['full_market_value'], 50)
+            q3 = np.percentile(filtered_cny_data_df['full_market_value'], 75)
+            mean = filtered_cny_data_df['full_market_value'].mean()
+            std_dev = filtered_cny_data_df['full_market_value'].std()
+
+            st.subheader("📊 Statistical Summary for Full Market Value")
+            st.markdown(f"""
+            | Measure                        | Value (USD)                  |
+            | ------------------------------ | -----------------------------|
+            | 💲 **Quartile 1 (0% - 25%)**   | {filtered_cny_data_df['full_market_value'].min():,.2f} to {q1:,.2f}  |
+            | 💲 **Quartile 2 (25% - 50%)**  | {q1:,.2f} to {q2_median:,.2f}  |
+            | 💲 **Quartile 3 (50% - 75%)**  | {q2_median:,.2f} to {q3:,.2f}  |
+            | 💲 **Quartile 4 (75% - 100%)** | {q3:,.2f} to {filtered_cny_data_df['full_market_value'].max():,.2f}  |
+            | 🔸 **Mean (Average)**          | {mean:,.2f}                  |
+            | 🔹 **Median (Middle Value)**   | {q2_median:,.2f}             |
+            | 📌 **Standard Deviation**      | {std_dev:,.2f}                |
+            """)
+
+            st.markdown("""
+            ### 📖 What does *Standard Deviation* mean here?
+
+            **Standard deviation** is a measure of how spread out property values are around the average (mean). 
+
+            - A **low value** means most properties have market values close to average—prices are relatively consistent.
+            - A **high value** means values vary widely, and there's a larger gap between cheaper and more expensive properties.
+
+            It is a value that indicates whether property values in the selected data generally tend to cluster closely 
+            around the average market price, or show significant variation from property to property.
+            """)
         else:
-            st.session_state.selected_page = 1
-            st.session_state.slider_page = 1
-
-        # Paginated DataFrame
-        paginated_data = paginate_dataframe(filtered_cny_data_df, st.session_state.selected_page - 1, rows_per_page)
-
-        st.header('CNY Real Estate Data Available', divider='gray')
-        st.dataframe(paginated_data)
-
-        # Previous and next page controls for easier navigation when there are a high number of pages
-        col_prev, col_info, col_next = st.columns([1, 2, 1])
-
-        with col_prev:
-            st.button("← Previous", on_click=previous_page)
-
-        with col_info:
-            st.markdown(
-                f"<div style='text-align:center'>Page <b>{st.session_state.selected_page}</b> of <b>{total_pages}</b></div>",
-                unsafe_allow_html=True)
-
-        with col_next:
-
-            # Use nested columns to align button right
-            spacer, next_button_col = st.columns([4, 2])
-
-            with next_button_col:
-                st.button("Next →", on_click=next_page)
-
-        fig = px.box(
-            filtered_cny_data_df,
-            x='full_market_value',
-            orientation='h',
-            points='outliers',  # visualize outliers
-            title='Distribution of Full Market Value'
-        )
-
-        # Add mean marker explicitly
-        mean_value = filtered_cny_data_df['full_market_value'].mean()
-        fig.add_scatter(
-            x=[mean_value],
-            y=[0],  # since this is a horizontal box plot there is only one category on y-axis
-            mode='markers',
-            marker=dict(color='red', symbol='diamond', size=10),
-            name='Mean'
-        )
-
-        # Update layout to clearly indicate quartiles, median, mean, and to enhance readability
-        fig.update_layout(
-            xaxis_title='Full Market Value ($)',
-            showlegend=True
-        )
-
-        # Finally, show box plot
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Calculate quartiles, median, mean, std deviation
-        q1 = np.percentile(filtered_cny_data_df['full_market_value'], 25)
-        q2_median = np.percentile(filtered_cny_data_df['full_market_value'], 50)
-        q3 = np.percentile(filtered_cny_data_df['full_market_value'], 75)
-        mean = filtered_cny_data_df['full_market_value'].mean()
-        std_dev = filtered_cny_data_df['full_market_value'].std()
-
-        st.subheader("📊 Statistical Summary for Full Market Value")
-        st.markdown(f"""
-        | Measure                        | Value (USD)                  |
-        | ------------------------------ | -----------------------------|
-        | 💲 **Quartile 1 (0% - 25%)**   | {filtered_cny_data_df['full_market_value'].min():,.2f} to {q1:,.2f}  |
-        | 💲 **Quartile 2 (25% - 50%)**  | {q1:,.2f} to {q2_median:,.2f}  |
-        | 💲 **Quartile 3 (50% - 75%)**  | {q2_median:,.2f} to {q3:,.2f}  |
-        | 💲 **Quartile 4 (75% - 100%)** | {q3:,.2f} to {filtered_cny_data_df['full_market_value'].max():,.2f}  |
-        | 🔸 **Mean (Average)**          | {mean:,.2f}                  |
-        | 🔹 **Median (Middle Value)**   | {q2_median:,.2f}             |
-        | 📌 **Standard Deviation**      | {std_dev:,.2f}                |
-        """)
-
-        st.markdown("""
-        ### 📖 What does *Standard Deviation* mean here?
-
-        **Standard deviation** is a measure of how spread out property values are around the average (mean). 
-
-        - A **low value** means most properties have market values close to average—prices are relatively consistent.
-        - A **high value** means values vary widely, and there's a larger gap between cheaper and more expensive properties.
-
-        It is a value that indicates whether property values in the selected data generally tend to cluster closely 
-        around the average market price, or show significant variation from property to property.
-        """)
+            st.info("No records match your search criteria. Please adjust or clear your search.")
 
     else:
         st.info("No data available to plot.")
